@@ -2,7 +2,7 @@
 #data: a container
 #path_type: When emptying out/flattening a dictionary, 
 #           decide whether to use an enountered array's indexes("index") or values("value") as keys
-#           in key value pairs(or tuples if the top layer is a list-like container)
+#           in key value pairs(or 2-tuples if the top layer is a list-like container)
 
 #flatten: Empty out nested containers of the same type as the outermost container into the outermost container
 #Currying is required, meaning this function returns a function which then returns the result
@@ -42,10 +42,7 @@ def flatten(data):
 #if the outermost layer is a dictionary, inner list-like containers are put emptied into it as a key value pair of either:
 #1. The index of the array and the value at that index(list_like_value_key="index")
 #2. The value of the array at an index and the value True(list_like_value_key="value")
-def atomize(data,
-            list_like_value_key="index", 
-            path_type=tuple, #Decide the type of keys in key value pairs(or tuples if the top layer is a list-like container) from emptied-out dictionaries
-            ):
+def atomize(data, list_like_value_key="index", path_type=tuple):
     #Setup
     is_dict = isinstance(data, dict)
 
