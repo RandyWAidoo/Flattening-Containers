@@ -1,4 +1,4 @@
-#Parameters:
+#General Parameters:
 #data: a container
 #path_type: When emptying out/flattening a dictionary, 
 #           decide whether to use an enountered array's indexes("index") or values("value") as keys
