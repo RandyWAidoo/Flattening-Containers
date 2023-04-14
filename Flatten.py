@@ -1,8 +1,10 @@
 #General Parameters:
 #data: a container
-#path_type: When emptying out/flattening a dictionary, 
-#           decide whether to use an enountered array's indexes("index") or values("value") as keys
-#           in key value pairs(or 2-tuples if the top layer is a list-like container)
+#path_type: A particular type.
+#           When emptying out/flattening a dictionary, 
+#           all keys traversed on the way down to a final, not-to-be-traversed, value are put together in a list 
+#           which is then converted to an object of type path_type.
+#           That path_type object will be the key of the value
 
 #flatten: Empty out nested containers of the same type as the outermost container into the outermost container
 #Currying is required, meaning this function returns a function which then returns the result
@@ -39,9 +41,12 @@ def flatten(data):
 
 #atomize: Empty out all containers into the outermost container; make the container 1-dimesnsional
 #If the outermost layer is a list-like container, inner dictionary key-value pairs are emptied into it as 2-tuples
-#if the outermost layer is a dictionary, inner list-like containers are put emptied into it as a key value pair of either:
-#1. The index of the array and the value at that index(list_like_value_key="index")
-#2. The value of the array at an index and the value True(list_like_value_key="value")
+#if the outermost layer is a dictionary, inner list-like containers are put emptied into it as a key value pair
+#list_like_value_key:
+#When adding to the list of traversed keys on the way to a value, different key options can be added when that value comes from with an array:
+#1. The current index of the array(list_like_value_key="index")
+#2. The value of the array at the current index(list_like_value_key="value"). 
+#   When this happens, the corresponding value will be True
 def atomize(data, list_like_value_key="index", path_type=tuple):
     #Setup
     is_dict = isinstance(data, dict)
