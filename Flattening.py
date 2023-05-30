@@ -1,5 +1,5 @@
 #General Parameters:
-#data: a container
+#data: an iterable
 #path_type: A particular type.
 #           When emptying out/flattening a dictionary, 
 #           all keys traversed on the way down to a final, not-to-be-traversed, value are put together in a list 
@@ -40,23 +40,20 @@ def flatten(data):
     return _flatten_list_like
 
 #atomize: Empty out all containers into the outermost container; make the container 1-dimesnsional
-#If the outermost layer is a list-like container, inner dictionary key-value pairs are emptied into it as 2-tuples
-#if the outermost layer is a dictionary, inner list-like containers are put emptied into it as a key value pair
-#list_like_value_key:
-#When adding to the list of traversed keys on the way to a value, different key options can be added when that value comes from with an array:
-#1. The current index of the array(list_like_value_key="index")
-#2. The value of the array at the current index(list_like_value_key="value"). 
-#   When this happens, the corresponding value will be True
+#If the outermost layer is a list-like container, 
+# inner dictionary key-value pairs are emptied into it as 2-tuples
+#if the outermost layer is a dictionary, 
+# inner list-like containers are put emptied into it as a key value pair
+#Parameter:
+# list_like_value_key:
+#  When adding to the list of traversed keys on the way to a value, 
+#   different key options can be added when that value comes from with an array:
+#  1. The current index of the array(list_like_value_key="index")
+#  2. The value of the array at the current index(list_like_value_key="value"). 
+#     When this happens, the corresponding value will be True
 def atomize(data, list_like_value_key="index", path_type=tuple):
-    #Setup
-    is_dict = isinstance(data, dict)
-
-    def dict_concat(visited, _data, _path): 
-        visited[_path] = _data
-    def other_concat(visited, _data, _path): 
-        visited += type(visited)([_data])
-    concat_method = dict_concat if is_dict else other_concat
-
+    #Setting function variables to be used later
+    # Defining the functions
     def list_like_value_key_index_loop(func, _data, visited, _path, from_opposite):
         list_like_key = 0
         for val in _data:
@@ -67,44 +64,51 @@ def atomize(data, list_like_value_key="index", path_type=tuple):
             func(val, visited, _path+[val], from_opposite)
     def conform_index(_data): return _data
     def conform_value(_data): return True
-    list_like_value_key_loop = list_like_value_key_index_loop
+    # Setting variables to them
+    list_like_loop = list_like_value_key_index_loop
     conform = conform_index
     if list_like_value_key == "value":
-        list_like_value_key_loop = list_like_value_key_value_loop
+        list_like_loop = list_like_value_key_value_loop
         conform = conform_value
-
+    
     #Making the 1d container
+    # atomimzing dictonaries
     def atomize_dict(_data, visited, _path, from_list_like=False):
         if isinstance(_data, dict):
             for key, val in _data.items():
                 atomize_dict(val, visited, _path+[key], from_list_like)
         elif not isinstance(_data, str):
-            try: list_like_value_key_loop(atomize_dict, _data, visited, _path, True)
+            try: list_like_loop(atomize_dict, _data, visited, _path, True)
             except (AttributeError, TypeError):
                 if from_list_like:
-                    concat_method(visited, conform(_data), path_type(_path))
-                else: concat_method(visited, _data, path_type(_path))
+                    visited[path_type(_path)] = conform(_data)
+                else: visited[path_type(_path)] = _data
         elif from_list_like: 
-            concat_method(visited, conform(_data), path_type(_path))
-        else: concat_method(visited, _data, path_type(_path))
+            visited[path_type(_path)] = conform(_data)
+        else: visited[path_type(_path)] = _data
         return visited
     
+    # atomimzing list-like containers
     def atomize_list_like(_data, visited, _path, from_dict=False):
         if isinstance(_data, dict):
             for key, val in _data.items():
                 atomize_list_like(val, visited, _path+[key], True)
         elif not isinstance(_data, str):
-            try: list_like_value_key_loop(atomize_list_like, _data, 
-                                          visited, _path, from_dict)
+            try: list_like_loop(atomize_list_like, _data, 
+                                visited, _path, from_dict)
             except (AttributeError, TypeError):
                 if from_dict:
-                    concat_method(visited, (path_type(_path), conform(_data)), path_type(_path))
-                else: concat_method(visited, _data, path_type(_path))
-        elif from_dict: 
-            concat_method(visited, (path_type(_path), conform(_data)), path_type(_path))
-        else: concat_method(visited, _data, path_type(_path))
+                    key = path_type(_path)
+                    val = conform(_data)
+                    visited += type(visited)((key, val))
+                else: visited += type(visited)([_data])
+        elif from_dict:
+            key = path_type(_path)
+            val = conform(_data)
+            visited += type(visited)((key, val))
+        else: visited += type(visited)([_data])
         return visited
 
-    if is_dict:
+    if isinstance(data, dict):
         return atomize_dict(data, type(data)(), [])
     return atomize_list_like(data, type(data)(), [])
