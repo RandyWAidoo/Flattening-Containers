@@ -1,14 +1,14 @@
 #General Parameters:
 #data: an iterable
-#path_type: A particular type.
+#fusion: A particular type/function.
 #           When emptying out/flattening a dictionary, 
-#           all keys traversed on the way down to a final, not-to-be-traversed, value are put together in a list 
-#           which is then converted to an object of type path_type.
-#           That path_type object will be the key of the value
+#           all keys traversed on the way down to a final, 
+#           not-to-be-traversed, value are put together in a list 
+#           which is then converted to an object that represents that list by `fusion`
 
 #flatten: Empty out nested containers of the same type as the outermost container into the outermost container
 #Currying is required, meaning this function returns a function which then returns the result
-#When a dictionary is passed, the returned function asks for `path_type` which defaults to tuple
+#When a dictionary is passed, the returned function asks for `fusion` which defaults to tuple
 #Otherwise, the returned function has no parameters
 def flatten(data):
     #Setup
@@ -16,12 +16,12 @@ def flatten(data):
     _visited = dtype()
 
     #Flattening
-    def flatten_dict(_data, path_type, path, visited)->dict:
+    def flatten_dict(_data, fusion, path, visited)->dict:
         if isinstance(_data, dtype):
             for key, val in _data.items():
-                flatten_dict(val, path_type, path+[key], visited)
+                flatten_dict(val, fusion, path+[key], visited)
         else:
-            visited[path_type(path)] = _data
+            visited[fusion(path)] = _data
         return visited
     
     def flatten_list_like(_data, visited)->dict:
@@ -33,8 +33,8 @@ def flatten(data):
         return visited
 
     if dtype == dict:
-        def _flatten_dict(path_type=tuple):
-            return flatten_dict(data, path_type, [], _visited)
+        def _flatten_dict(fusion=tuple):
+            return flatten_dict(data, fusion, [], _visited)
         return _flatten_dict
     def _flatten_list_like(): return flatten_list_like(data, _visited)
     return _flatten_list_like
@@ -51,7 +51,7 @@ def flatten(data):
 #  1. The current index of the array(list_like_value_key="index")
 #  2. The value of the array at the current index(list_like_value_key="value"). 
 #     When this happens, the corresponding value will be True
-def atomize(data, list_like_value_key="index", path_type=tuple):
+def atomize(data, list_like_value_key="index", fusion=tuple):
     #Setting function variables to be used later
     # Defining the functions
     def list_like_value_key_index_loop(func, _data, visited, _path, from_opposite):
@@ -81,11 +81,11 @@ def atomize(data, list_like_value_key="index", path_type=tuple):
             try: list_like_loop(atomize_dict, _data, visited, _path, True)
             except (AttributeError, TypeError):
                 if from_list_like:
-                    visited[path_type(_path)] = conform(_data)
-                else: visited[path_type(_path)] = _data
+                    visited[fusion(_path)] = conform(_data)
+                else: visited[fusion(_path)] = _data
         elif from_list_like: 
-            visited[path_type(_path)] = conform(_data)
-        else: visited[path_type(_path)] = _data
+            visited[fusion(_path)] = conform(_data)
+        else: visited[fusion(_path)] = _data
         return visited
     
     # atomimzing list-like containers
@@ -98,12 +98,12 @@ def atomize(data, list_like_value_key="index", path_type=tuple):
                                 visited, _path, from_dict)
             except (AttributeError, TypeError):
                 if from_dict:
-                    key = path_type(_path)
+                    key = fusion(_path)
                     val = conform(_data)
                     visited += type(visited)((key, val))
                 else: visited += type(visited)([_data])
         elif from_dict:
-            key = path_type(_path)
+            key = fusion(_path)
             val = conform(_data)
             visited += type(visited)((key, val))
         else: visited += type(visited)([_data])
