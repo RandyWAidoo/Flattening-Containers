@@ -8,7 +8,7 @@
 
 #flatten: Empty out nested containers of the same type as the outermost container into the outermost container
 #Currying is required, meaning this function returns a function which then returns the result
-#When a dictionary is passed, the returned function asks for path_type which defaults to tuple
+#When a dictionary is passed, the returned function asks for `path_type` which defaults to tuple
 #Otherwise, the returned function has no parameters
 def flatten(data):
     #Setup
