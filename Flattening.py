@@ -63,7 +63,7 @@ def atomize(data, list_like_value_key="index", fusion=tuple):
         for val in _data:
             func(val, visited, _path+[val], from_opposite)
     def conform_index(_data): return _data
-    def conform_value(_data): return True
+    def conform_value(_data): return 1
     # Setting variables to them
     list_like_loop = list_like_value_key_index_loop
     conform = conform_index
