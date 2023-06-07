@@ -6,6 +6,13 @@
 #           not-to-be-traversed, value are put together in a list 
 #           which is then converted to an object that represents that list by `fusion`
 
+#Indicate whether iterating over a specific datatype 
+# generates instances of the same datatype as with strings
+def is_fractal(val):
+    for _val in val:
+        return (type(_val) == type(val))
+    return False
+
 #flatten: Empty out nested containers of the same type as the outermost container into the outermost container
 #Currying is required, meaning this function returns a function which then returns the result
 #When a dictionary is passed, the returned function asks for `fusion` which defaults to tuple
@@ -17,22 +24,22 @@ def flatten(data):
 
     #Flattening
     def flatten_dict(_data, fusion, path, visited)->dict:
-        if isinstance(_data, dtype):
+        if not is_fractal(_data) and isinstance(_data, dtype):
             for key, val in _data.items():
                 flatten_dict(val, fusion, path+[key], visited)
         else:
             visited[fusion(path)] = _data
         return visited
     
-    def flatten_list_like(_data, visited)->dict:
-        if isinstance(_data, dtype):
+    def flatten_list_like(_data, visited):
+        if not is_fractal(_data) and isinstance(_data, dtype):
             for val in _data:
                 flatten_list_like(val, visited)
         else:
             visited += dtype([_data])
         return visited
 
-    if dtype == dict:
+    if isinstance(data, dict):
         def _flatten_dict(fusion=tuple):
             return flatten_dict(data, fusion, [], _visited)
         return _flatten_dict
@@ -73,11 +80,11 @@ def atomize(data, list_like_value_key="index", fusion=tuple):
     
     #Making the 1d container
     # atomimzing dictonaries
-    def atomize_dict(_data, visited, _path, from_list_like=False):
+    def atomize_dict(_data, visited, _path, from_list_like=False)->dict:
         if isinstance(_data, dict):
             for key, val in _data.items():
                 atomize_dict(val, visited, _path+[key], from_list_like)
-        elif not isinstance(_data, str):
+        elif not is_fractal(_data):
             try: list_like_loop(atomize_dict, _data, visited, _path, True)
             except (AttributeError, TypeError):
                 if from_list_like:
@@ -93,7 +100,7 @@ def atomize(data, list_like_value_key="index", fusion=tuple):
         if isinstance(_data, dict):
             for key, val in _data.items():
                 atomize_list_like(val, visited, _path+[key], True)
-        elif not isinstance(_data, str):
+        elif not is_fractal(_data):
             try: list_like_loop(atomize_list_like, _data, 
                                 visited, _path, from_dict)
             except (AttributeError, TypeError):
