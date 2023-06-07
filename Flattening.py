@@ -70,7 +70,7 @@ def atomize(data, list_like_value_key="index", fusion=tuple):
         for val in _data:
             func(val, visited, _path+[val], from_opposite)
     def conform_index(_data): return _data
-    def conform_value(_data): return 1
+    def conform_value(_data): return True
     # Setting variables to them
     list_like_loop = list_like_value_key_index_loop
     conform = conform_index
@@ -89,10 +89,12 @@ def atomize(data, list_like_value_key="index", fusion=tuple):
             except (AttributeError, TypeError):
                 if from_list_like:
                     visited[fusion(_path)] = conform(_data)
-                else: visited[fusion(_path)] = _data
+                else: 
+                    visited[fusion(_path)] = _data
         elif from_list_like: 
             visited[fusion(_path)] = conform(_data)
-        else: visited[fusion(_path)] = _data
+        else: 
+            visited[fusion(_path)] = _data
         return visited
     
     # atomimzing list-like containers
@@ -108,12 +110,14 @@ def atomize(data, list_like_value_key="index", fusion=tuple):
                     key = fusion(_path)
                     val = conform(_data)
                     visited += type(visited)((key, val))
-                else: visited += type(visited)([_data])
+                else: 
+                    visited += type(visited)([_data])
         elif from_dict:
             key = fusion(_path)
             val = conform(_data)
             visited += type(visited)((key, val))
-        else: visited += type(visited)([_data])
+        else: 
+            visited += type(visited)([_data])
         return visited
 
     if isinstance(data, dict):
