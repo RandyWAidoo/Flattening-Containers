@@ -6,9 +6,18 @@
 #           not-to-be-traversed, value are put together in a list 
 #           which is then converted to an object that represents that list by `fusion`
 
+#Indicate whether an object is iterable
+def iterable(val)->bool:
+    try:
+        iter(val)
+        return True
+    except TypeError:
+        pass
+    return False
+
 #Indicate whether iterating over a specific datatype 
 # generates instances of the same datatype as with strings
-def is_fractal(val):
+def is_fractal(val)->bool:
     for _val in val:
         return (type(_val) == type(val))
     return False
@@ -24,7 +33,7 @@ def flatten(data):
 
     #Flattening
     def flatten_dict(_data, fusion, path, visited)->dict:
-        if not is_fractal(_data) and isinstance(_data, dtype):
+        if isinstance(_data, dtype) and not is_fractal(_data):
             for key, val in _data.items():
                 flatten_dict(val, fusion, path+[key], visited)
         else:
@@ -32,7 +41,7 @@ def flatten(data):
         return visited
     
     def flatten_list_like(_data, visited):
-        if not is_fractal(_data) and isinstance(_data, dtype):
+        if isinstance(_data, dtype) and not is_fractal(_data):
             for val in _data:
                 flatten_list_like(val, visited)
         else:
@@ -84,10 +93,10 @@ def atomize(data, list_like_value_key="index", fusion=tuple):
         if isinstance(_data, dict):
             for key, val in _data.items():
                 atomize_dict(val, visited, _path+[key], from_list_like)
-        elif not is_fractal(_data):
+        elif iterable(_data) and not is_fractal(_data):
             try: 
                 list_like_loop(atomize_dict, _data, visited, _path, True)
-            except (AttributeError, TypeError):
+            except TypeError:
                 if from_list_like:
                     visited[fusion(_path)] = conform(_data)
                 else: 
@@ -103,11 +112,11 @@ def atomize(data, list_like_value_key="index", fusion=tuple):
         if isinstance(_data, dict):
             for key, val in _data.items():
                 atomize_list_like(val, visited, _path+[key], True)
-        elif not is_fractal(_data):
+        elif iterable(_data) and not is_fractal(_data):
             try: 
                 list_like_loop(atomize_list_like, _data, 
                                visited, _path, from_dict)
-            except (AttributeError, TypeError):
+            except TypeError:
                 if from_dict:
                     key = fusion(_path)
                     val = conform(_data)
