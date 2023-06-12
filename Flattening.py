@@ -85,7 +85,8 @@ def atomize(data, list_like_value_key="index", fusion=tuple):
             for key, val in _data.items():
                 atomize_dict(val, visited, _path+[key], from_list_like)
         elif not is_fractal(_data):
-            try: list_like_loop(atomize_dict, _data, visited, _path, True)
+            try: 
+                list_like_loop(atomize_dict, _data, visited, _path, True)
             except (AttributeError, TypeError):
                 if from_list_like:
                     visited[fusion(_path)] = conform(_data)
@@ -103,8 +104,9 @@ def atomize(data, list_like_value_key="index", fusion=tuple):
             for key, val in _data.items():
                 atomize_list_like(val, visited, _path+[key], True)
         elif not is_fractal(_data):
-            try: list_like_loop(atomize_list_like, _data, 
-                                visited, _path, from_dict)
+            try: 
+                list_like_loop(atomize_list_like, _data, 
+                               visited, _path, from_dict)
             except (AttributeError, TypeError):
                 if from_dict:
                     key = fusion(_path)
