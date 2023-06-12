@@ -79,7 +79,7 @@ def atomize(data, list_like_value_key="index", fusion=tuple):
         conform = conform_value
     
     #Making the 1d container
-    # atomimzing dictonaries
+    # atomizing dictonaries
     def atomize_dict(_data, visited, _path, from_list_like=False)->dict:
         if isinstance(_data, dict):
             for key, val in _data.items():
@@ -97,7 +97,7 @@ def atomize(data, list_like_value_key="index", fusion=tuple):
             visited[fusion(_path)] = _data
         return visited
     
-    # atomimzing list-like containers
+    # atomizing list-like containers
     def atomize_list_like(_data, visited, _path, from_dict=False):
         if isinstance(_data, dict):
             for key, val in _data.items():
